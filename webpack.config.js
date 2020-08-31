@@ -50,6 +50,7 @@ module.exports = {
     alias: {
       vue$: '/Users/leaf/Developer/fork/vue-next/packages/vue',
       '@': path.resolve(__dirname, 'src')
-    }
+    },
+    extensions: ['.ts', '.tsx', '.js', '.jsx']
   }
 }

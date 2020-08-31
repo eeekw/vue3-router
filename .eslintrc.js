@@ -21,9 +21,32 @@ module.exports = {
     'comma-dangle': ['error', 'never'],
     '@typescript-eslint/no-var-requires': 'off',
     'eol-last': 'off',
-    'arrow-parens': 'off'
+    'arrow-parens': 'off',
+    'no-use-before-define': 'off',
+    'import/extensions': [
+      'error',
+      'always',
+      {
+        js: 'never',
+        mjs: 'never',
+        jsx: 'never',
+        ts: 'never',
+        tsx: 'never'
+      }
+    ]
   },
   settings: {
     'import/resolver': 'webpack'
-  }
+    // 'import/extensions': ['.js', '.jsx', '.mjs', '.ts', '.tsx']
+  },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      rules: {
+        // The core 'no-unused-vars' rules (in the eslint:recommeded ruleset)
+        // does not work with type definitions
+        'no-unused-vars': 'off'
+      }
+    }
+  ]
 }

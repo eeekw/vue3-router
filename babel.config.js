@@ -1,3 +1,3 @@
 module.exports = {
-  presets: ['@babel/env', { useBuiltIns: 'usage' }]
+  presets: [['@babel/preset-env', { useBuiltIns: 'usage' }]]
 }
