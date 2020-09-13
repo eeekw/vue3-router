@@ -1,5 +1,2 @@
-import Router from './router'
-
-export default Router
-
+export { default } from './router'
 export * from './router'

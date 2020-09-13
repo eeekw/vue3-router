@@ -2,20 +2,33 @@ import Route from './route'
 import { RouteOption } from './router'
 
 export default class RouteMatcher {
-  routeMatch?: Map<string, Route>
+  routeMatchMap: Map<string, Route>
+
+  routeMatchList: string[]
 
   constructor(routes?: RouteOption[]) {
-    this.routeMatch = new Map()
+    this.routeMatchMap = new Map()
+    this.routeMatchList = []
+    this.addRouteMacth(routes)
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  matchRoute() {}
+  matchRoute(path: string): Route | null | undefined {
+    const routeMatch = this.routeMatchList.find((v) => {
+      const reg = new RegExp(v)
+      return reg.test(path)
+    })
+    if (routeMatch == null) {
+      return null
+    }
+    return this.routeMatchMap.get(routeMatch)
+  }
 
   protected addRouteMacth(routes?: RouteOption[], parent?: Route | null) {
     if (parent) {
       const { path } = parent
-      if (!this.routeMatch?.get(path)) {
-        this.routeMatch?.set(path, parent)
+      if (!this.routeMatchMap.get(path)) {
+        this.routeMatchMap.set(path, parent)
+        this.routeMatchList.push(path)
       }
     }
     if (!routes || routes.length === 0) {

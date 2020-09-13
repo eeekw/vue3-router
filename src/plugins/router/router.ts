@@ -1,16 +1,14 @@
 import type { App, Component } from 'vue'
-import Route from './route'
 import RouteMatcher from './matcher'
 
 const install = (app: App, options: RouterOption): void => {
-  app.mixin({
-    beforeCreate() {
-      const router = new Router(options)
-    }
-  })
+  app.config.globalProperties.$router = new Router(options)
 }
 
-enum Mode {}
+enum Mode {
+  Hash,
+  History
+}
 
 export interface RouterOption {
   routes: RouteOption[]
@@ -25,6 +23,8 @@ export interface RouteOption {
 
 export default class Router {
   static install: any
+
+  mode = Mode.Hash
 
   matcher?: RouteMatcher
 
