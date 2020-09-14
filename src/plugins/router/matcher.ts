@@ -12,13 +12,13 @@ export default class RouteMatcher {
     this.addRouteMacth(routes)
   }
 
-  matchRoute(path: string): Route | null | undefined {
+  matchRoute(path: string): Route | undefined {
     const routeMatch = this.routeMatchList.find((v) => {
       const reg = new RegExp(v)
       return reg.test(path)
     })
-    if (routeMatch == null) {
-      return null
+    if (!routeMatch) {
+      return undefined
     }
     return this.routeMatchMap.get(routeMatch)
   }

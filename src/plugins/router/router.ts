@@ -1,8 +1,15 @@
-import type { App, Component } from 'vue'
+import type { App, Component, Ref } from 'vue'
+import { readonly, ref } from 'vue'
 import RouteMatcher from './matcher'
+import HashHistory from './hash'
+import Route from './route'
+import RouterView from './components/RouterView.vue'
 
 const install = (app: App, options: RouterOption): void => {
-  app.config.globalProperties.$router = new Router(options)
+  const router = new Router(options)
+  app.config.globalProperties.$router = router
+  app.component('router-view', RouterView)
+  app.provide('route', readonly(router.routeRef))
 }
 
 enum Mode {
@@ -28,9 +35,27 @@ export default class Router {
 
   matcher?: RouteMatcher
 
+  history?: HashHistory
+
+  routeRef: Ref<Route | undefined>
+
   constructor(options: RouterOption) {
     const { routes } = options
     this.matcher = new RouteMatcher(routes)
+    this.routeRef = ref()
+    if (this.mode === Mode.Hash) {
+      this.history = new HashHistory(this)
+    }
+    this.history?.listen((route) => {
+      this.routeRef.value = route
+    })
+    this.history?.transitionTo(() => {
+      this.history?.addListener()
+    })
+  }
+
+  match(path: string) : Route | undefined {
+    return this.matcher?.matchRoute(path)
   }
 }
 
