@@ -5,7 +5,9 @@ class Route {
 
   component: Component
 
-  parent?: Route | null
+  parent?: Route
+
+  child?: Route
 
   constructor(path: string, component: Component, parent?: Route) {
     this.path = path

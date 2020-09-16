@@ -6,15 +6,14 @@ export default class RouteMatcher {
 
   routeMatchList: string[]
 
-  constructor(routes?: RouteOption[]) {
+  constructor() {
     this.routeMatchMap = new Map()
     this.routeMatchList = []
-    this.addRouteMacth(routes)
   }
 
   matchRoute(path: string): Route | undefined {
     const routeMatch = this.routeMatchList.find((v) => {
-      const reg = new RegExp(v)
+      const reg = new RegExp(`^${v}$`)
       return reg.test(path)
     })
     if (!routeMatch) {
@@ -23,7 +22,7 @@ export default class RouteMatcher {
     return this.routeMatchMap.get(routeMatch)
   }
 
-  protected addRouteMacth(routes?: RouteOption[], parent?: Route | null) {
+  addRouteMacth(routes: RouteOption[], parent?: Route) {
     if (parent) {
       const { path } = parent
       if (!this.routeMatchMap.get(path)) {
@@ -31,7 +30,7 @@ export default class RouteMatcher {
         this.routeMatchList.push(path)
       }
     }
-    if (!routes || routes.length === 0) {
+    if (routes.length === 0) {
       return
     }
     routes.forEach((o) => {
@@ -41,8 +40,8 @@ export default class RouteMatcher {
         const { path: rootPath } = parent
         path = rootPath + path
       }
-      const route = new Route(path, component!)
-      this.addRouteMacth(children, route)
+      const route = new Route(path, component!, parent)
+      this.addRouteMacth(children ?? [], route)
     })
   }
 }

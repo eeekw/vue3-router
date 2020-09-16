@@ -1,5 +1,5 @@
+import { shallowRef, ref, triggerRef } from 'vue'
 import type { App, Component, Ref } from 'vue'
-import { readonly, ref } from 'vue'
 import RouteMatcher from './matcher'
 import HashHistory from './hash'
 import Route from './route'
@@ -7,19 +7,17 @@ import RouterView from './components/RouterView.vue'
 
 const install = (app: App, options: RouterOption): void => {
   const router = new Router(options)
-  app.config.globalProperties.$router = router
-  app.component('router-view', RouterView)
-  app.provide('route', readonly(router.routeRef))
+  router.register(app)
 }
 
-enum Mode {
+export enum Mode {
   Hash,
   History
 }
 
 export interface RouterOption {
-  routes: RouteOption[]
-  mode: Mode
+  routes?: RouteOption[]
+  mode?: Mode
 }
 
 export interface RouteOption {
@@ -33,29 +31,65 @@ export default class Router {
 
   mode = Mode.Hash
 
-  matcher?: RouteMatcher
+  matcher: RouteMatcher
 
-  history?: HashHistory
+  routes?: RouteOption[]
 
-  routeRef: Ref<Route | undefined>
+  route?: Route
+
+  app?: App
+
+  private _history?: HashHistory
+
+  private _route: Ref<Route | undefined>
 
   constructor(options: RouterOption) {
-    const { routes } = options
-    this.matcher = new RouteMatcher(routes)
-    this.routeRef = ref()
-    if (this.mode === Mode.Hash) {
-      this.history = new HashHistory(this)
+    const { mode, routes } = options
+    if (mode) {
+      this.mode = mode
     }
-    this.history?.listen((route) => {
-      this.routeRef.value = route
+    this.routes = routes
+    this.matcher = new RouteMatcher()
+    if (this.mode === Mode.Hash) {
+      this._history = new HashHistory(this)
+    }
+    this._route = shallowRef() // shallowRef: 仅跟踪.value的变化，不会使整个value都是响应式，防止vue警告
+    // this._route = ref()
+  }
+
+  register(app: App) {
+    this.app = app
+    app.config.globalProperties.$router = this
+    app.provide('route', this._route)
+    app.component('router-view', RouterView)
+    this.init()
+  }
+
+  init() {
+    if (this.routes) {
+      this.addRoutes(this.routes)
+    }
+    this._history?.listen((route) => {
+      this.route = route
+      this._route.value = this.route
+      triggerRef(this._route)
     })
-    this.history?.transitionTo(() => {
-      this.history?.addListener()
+    this._history?.transitionTo(() => {
+      this._history?.addListener()
     })
   }
 
-  match(path: string) : Route | undefined {
-    return this.matcher?.matchRoute(path)
+  addRoutes(routes: RouteOption[]) {
+    this.matcher.addRouteMacth(routes)
+  }
+
+  match(path: string): Route | undefined {
+    let routeMatched = this.matcher?.matchRoute(path)
+    while (routeMatched?.parent) {
+      routeMatched.parent.child = routeMatched
+      routeMatched = routeMatched.parent
+    }
+    return routeMatched
   }
 }
 

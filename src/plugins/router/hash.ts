@@ -45,7 +45,7 @@ export default class HashHistory {
 }
 
 function getHash(): string {
-  return window.location.hash
+  return window.location.hash.slice(1)
 }
 
 function normalizeHash(): boolean {
