@@ -1,28 +1,20 @@
-import Route from './route'
-import { RouteOption } from './router'
+import { RawRoute } from './types'
+import { Route, createRoute } from './route'
 
 export default class RouteMatcher {
   routeMatchMap: Map<string, Route>
 
   routeMatchList: string[]
 
-  constructor() {
+  constructor(routes?: RawRoute[]) {
     this.routeMatchMap = new Map()
     this.routeMatchList = []
-  }
-
-  matchRoute(path: string): Route | undefined {
-    const routeMatch = this.routeMatchList.find((v) => {
-      const reg = new RegExp(`^${v}$`)
-      return reg.test(path)
-    })
-    if (!routeMatch) {
-      return undefined
+    if (routes) {
+      this.addRouteMacth(routes)
     }
-    return this.routeMatchMap.get(routeMatch)
   }
 
-  addRouteMacth(routes: RouteOption[], parent?: Route) {
+  addRouteMacth(routes: RawRoute[], parent?: Route) {
     if (parent) {
       const { path } = parent
       if (!this.routeMatchMap.get(path)) {
@@ -40,8 +32,19 @@ export default class RouteMatcher {
         const { path: rootPath } = parent
         path = rootPath + path
       }
-      const route = new Route(path, component!, parent)
+      const route = createRoute(path, component, parent)
       this.addRouteMacth(children ?? [], route)
     })
+  }
+
+  matchRoute(path: string): Route | undefined | null {
+    const routeMatch = this.routeMatchList.find((v) => {
+      const reg = new RegExp(`^${v}$`)
+      return reg.test(path)
+    })
+    if (!routeMatch) {
+      return null
+    }
+    return this.routeMatchMap.get(routeMatch)
   }
 }

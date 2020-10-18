@@ -1,19 +1,19 @@
 import type { Component } from 'vue'
 
-class Route {
+export type Route = {
   path: string
 
   component: Component
 
   parent?: Route
-
-  child?: Route
-
-  constructor(path: string, component: Component, parent?: Route) {
-    this.path = path
-    this.component = component
-    this.parent = parent
-  }
 }
 
-export default Route
+export function createRoute(path: string, component: Component, parent?: Route) : Route {
+  const route: Route = {
+    path,
+    component,
+    parent
+  }
+
+  return route
+}
