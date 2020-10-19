@@ -11,6 +11,7 @@ import { HashHistory } from './history/hash'
 import { Html5History } from './history/html5'
 import { Route } from './route'
 import RouterView from './components/RouterView'
+import RouterLink from './components/RouterLink'
 
 export type RouterConfig = {
   routes: RawRoute[]
@@ -24,6 +25,7 @@ export enum Mode {
 
 export type Router = Plugin & {
   addRoutes: (routes: RawRoute[]) => void
+  push: (to: HistoryLocation) => void
 }
 
 export function createRouter({ routes, mode = Mode.Hash } : RouterConfig): Router {
@@ -59,6 +61,8 @@ export function createRouter({ routes, mode = Mode.Hash } : RouterConfig): Route
   const router: Router = {
     install(app: App) {
       app.component('RouterView', RouterView)
+      app.component('RouterLink', RouterLink)
+      app.provide('router', router)
       app.provide('route', currentRouteLocation)
       app.config.globalProperties.$router = this
 
@@ -70,6 +74,10 @@ export function createRouter({ routes, mode = Mode.Hash } : RouterConfig): Route
 
     addRoutes(rs: RawRoute[]) {
       matcher.addRouteMacth(rs)
+    },
+
+    push(to: HistoryLocation) {
+      next(to)
     }
   }
 
