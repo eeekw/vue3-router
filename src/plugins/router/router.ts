@@ -6,7 +6,9 @@ import { shallowRef } from 'vue'
 import { MatchedRouteLocation, RawRoute } from './types'
 import { ROUTE_LOCATION_INIT } from './constant'
 import RouteMatcher from './matcher'
-import { createHashHistory, HistoryLocation } from './history/hash'
+import { HistoryLocation } from './history/history'
+import { HashHistory } from './history/hash'
+import { Html5History } from './history/html5'
 import { Route } from './route'
 import RouterView from './components/RouterView'
 
@@ -24,9 +26,9 @@ export type Router = Plugin & {
   addRoutes: (routes: RawRoute[]) => void
 }
 
-export function createRouter({ routes } : RouterConfig): Router {
+export function createRouter({ routes, mode = Mode.Hash } : RouterConfig): Router {
   const matcher = new RouteMatcher(routes)
-  const history = createHashHistory()
+  const history = mode === Mode.Hash ? new HashHistory() : new Html5History()
 
   const currentRouteLocation: Ref<MatchedRouteLocation> = shallowRef(ROUTE_LOCATION_INIT)
 

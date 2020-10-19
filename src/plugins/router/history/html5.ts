@@ -1,8 +1,16 @@
-export type Html5History = {
+import { History, Listener, HistoryLocation } from './history'
 
-}
+// eslint-disable-next-line import/prefer-default-export
+export class Html5History extends History {
+  listen(on: Listener) {
+    super.listen(on)
+    window.addEventListener('popstate', () => {
+      this.historyChange()
+    })
+  }
 
-export function createHtml5History() {
-  const history: Html5History = {}
-  return history
+  push(l: HistoryLocation) {
+    super.push(l)
+    window.history.pushState(l, '', l)
+  }
 }
